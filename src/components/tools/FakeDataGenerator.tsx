@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FakeData } from "../types/types";
+import type { FakeData } from "../../types/types";
 
 const FakeDataGenerator: React.FC = () => {
   const [fakeData, setFakeData] = useState<FakeData>({

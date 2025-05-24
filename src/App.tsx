@@ -1,11 +1,10 @@
-// src/App.tsx
 import React from "react";
-import DevEnvironment from "./components/DevEnvironment";
+import Desktop from "./components/workspace/Desktop";
 
 const App: React.FC = () => {
   return (
     <React.Fragment>
-      <DevEnvironment />
+      <Desktop />
     </React.Fragment>
   );
 };
