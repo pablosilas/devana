@@ -28,14 +28,14 @@ export const TOOL_REGISTRY: Record<ToolType, ToolConfig> = {
     defaultTitle: "Player de Música",
     defaultSize: { width: 450, height: 400 },
     icon: Play,
-    buttonClassName: "bg-purple-600 hover:bg-purple-700",
+    buttonClassName: "bg-blue-600 hover:bg-blue-700",
   },
   fakedata: {
     component: FakeDataGenerator,
     defaultTitle: "Gerador de Dados",
     defaultSize: { width: 500, height: 450 },
     icon: User,
-    buttonClassName: "bg-green-600 hover:bg-green-700",
+    buttonClassName: "bg-blue-600 hover:bg-blue-700",
   },
 };
 

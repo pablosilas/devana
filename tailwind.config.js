@@ -22,6 +22,9 @@ export default {
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
       },
+      fontFamily: {
+        'space-grotesk': ['Space Grotesk', 'sans-serif'],
+      }
     },
   },
   plugins: [],

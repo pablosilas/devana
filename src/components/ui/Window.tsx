@@ -73,10 +73,10 @@ const Window: React.FC<WindowProps> = ({
 
   const windowStyle = window.isMaximized
     ? {
-        width: "100vw",
+        width: "calc(100vw - 60px)",
         height: "calc(100vh - 60px)",
         left: 0,
-        top: 0,
+        top: 70,
         transform: "none",
         zIndex: window.zIndex,
       }
@@ -97,7 +97,7 @@ const Window: React.FC<WindowProps> = ({
     >
       {/* Header */}
       <div
-        className="bg-gray-700 px-4 py-2 flex justify-between items-center cursor-move select-none flex-shrink-0"
+        className="bg-gray-800 px-4 py-2 flex justify-between items-center cursor-move select-none flex-shrink-0"
         onMouseDown={handleHeaderMouseDown}
       >
         <span className="text-white font-medium">{window.title}</span>
@@ -107,7 +107,7 @@ const Window: React.FC<WindowProps> = ({
               e.stopPropagation();
               onMinimize(window.id);
             }}
-            className="w-6 h-6 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center transition-colors"
+            className="w-6 h-6 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors"
             title="Minimizar"
           >
             <Minus size={12} />
@@ -117,7 +117,7 @@ const Window: React.FC<WindowProps> = ({
               e.stopPropagation();
               onMaximize(window.id);
             }}
-            className="w-6 h-6 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
+            className="w-6 h-6 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors"
             title="Maximizar"
           >
             <Square size={10} />
@@ -127,7 +127,7 @@ const Window: React.FC<WindowProps> = ({
               e.stopPropagation();
               onClose(window.id);
             }}
-            className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+            className="w-6 h-6 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors"
             title="Fechar"
           >
             <X size={12} />
