@@ -10,6 +10,7 @@ import { AnimatePresence } from "framer-motion";
 import IntroScreen from "./components/ui/IntroScreen";
 import LoginPageWithNavigation from "./components/login/LoginPageWithNavigation";
 import Desktop from "./components/workspace/Desktop";
+import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
 
 // Componente principal da aplicação
@@ -39,12 +40,14 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Componente App principal com Router
+// Componente App principal com Router e AuthProvider
 const App: React.FC = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 

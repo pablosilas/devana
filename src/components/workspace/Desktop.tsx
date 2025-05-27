@@ -1,13 +1,14 @@
-// components/workspace/Desktop.tsx
-import React from "react";
-import { Timer, Play, User } from "lucide-react";
-import Window from "../ui/Window";
-import Header from "./Header";
+import React, { useState } from "react";
 import { useWindowManager } from "../../hooks/useWindowManager";
-import { renderTool, TOOL_REGISTRY } from "../../utils/toolRegistry";
-import type { ToolType } from "../../utils/toolRegistry";
+import Window from "../ui/Window";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import { renderTool } from "../../utils/toolRegistry";
 
 const Desktop: React.FC = () => {
+  // Estado para controlar se o sidebar está expandido
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const {
     windows,
     minimizedWindows,
@@ -21,82 +22,56 @@ const Desktop: React.FC = () => {
     restoreWindow,
   } = useWindowManager();
 
-  const openTool = (toolType: ToolType) => {
-    const toolConfig = TOOL_REGISTRY[toolType];
-    createWindow(toolType, toolConfig.defaultTitle);
-  };
+  // Calcula a largura atual do sidebar
+  const sidebarWidth = isExpanded ? 256 : 64;
 
   return (
-    <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
-      {/* Header com informações do usuário */}
-      <Header
-        sidebarWidth={0}
-        onEditProfile={() => console.log("Editar perfil")}
-        onNotifications={() => console.log("Notificações")}
-      />
+    <div className="h-screen flex flex-col bg-gradient-to-br from-black to-gray-700 overflow-hidden">
+      {/* Container principal com flexbox */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar
+          onCreateWindow={createWindow}
+          minimizedWindows={minimizedWindows}
+          onRestoreWindow={restoreWindow}
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+        />
 
-      {/* Desktop Area */}
-      <div className="flex-1 relative">
-        {/* Desktop Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800"></div>
+        {/* Conteúdo principal */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <Header
+            onEditProfile={() => console.log("Editar perfil")}
+            onNotifications={() => console.log("Notificações")}
+            sidebarWidth={0} // Não precisa ajustar pois agora está em flexbox
+          />
 
-        {/* Desktop Icons */}
-        <div className="absolute top-6 left-6 flex flex-col space-y-4">
-          <button
-            onClick={() => openTool("timer")}
-            className="flex flex-col items-center space-y-2 p-3 rounded-lg hover:bg-gray-800/50 transition-colors group"
-          >
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-700 transition-colors">
-              <Timer size={24} className="text-white" />
-            </div>
-            <span className="text-white text-sm">Timer</span>
-          </button>
-
-          <button
-            onClick={() => openTool("music")}
-            className="flex flex-col items-center space-y-2 p-3 rounded-lg hover:bg-gray-800/50 transition-colors group"
-          >
-            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-700 transition-colors">
-              <Play size={24} className="text-white" />
-            </div>
-            <span className="text-white text-sm">Música</span>
-          </button>
-
-          <button
-            onClick={() => openTool("fakedata")}
-            className="flex flex-col items-center space-y-2 p-3 rounded-lg hover:bg-gray-800/50 transition-colors group"
-          >
-            <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:bg-green-700 transition-colors">
-              <User size={24} className="text-white" />
-            </div>
-            <span className="text-white text-sm">Dados Fake</span>
-          </button>
+          {/* Desktop Area - onde as janelas ficam */}
+          <div className="flex-1 relative overflow-hidden">
+            {windows.map((window) => (
+              <Window
+                key={window.id}
+                window={window}
+                onClose={closeWindow}
+                onMinimize={minimizeWindow}
+                onMaximize={maximizeWindow}
+                onMove={moveWindow}
+                onResize={resizeWindow}
+                onFocus={focusWindow}
+              >
+                {renderTool(window.component)}
+              </Window>
+            ))}
+          </div>
         </div>
-
-        {/* Windows */}
-        {windows.map((window) => (
-          <Window
-            key={window.id}
-            window={window}
-            onClose={closeWindow}
-            onMinimize={minimizeWindow}
-            onMaximize={maximizeWindow}
-            onMove={moveWindow}
-            onResize={resizeWindow}
-            onFocus={focusWindow}
-          >
-            {renderTool(window.component)}
-          </Window>
-        ))}
       </div>
 
-      {/* Taskbar */}
-      <div className="bg-gray-800 border-t border-gray-600 px-4 py-2 flex items-center space-x-2">
-        {/* Start Button */}
-        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-white font-medium">
-          Menu
-        </button>
-
+      {/* Taskbar fixo na parte inferior */}
+      <div
+        className="bg-gray-800 border-t border-gray-600 px-4 py-2 flex items-center space-x-2 flex-shrink-0"
+        style={{ marginLeft: `${sidebarWidth}px` }}
+      >
         {/* Minimized Windows */}
         <div className="flex space-x-2">
           {minimizedWindows.map((window) => (
@@ -114,7 +89,7 @@ const Desktop: React.FC = () => {
         <div className="flex-1"></div>
 
         {/* Clock */}
-        <div className="text-white text-sm">
+        <div className="text-white text-sm font-medium">
           {new Date().toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",

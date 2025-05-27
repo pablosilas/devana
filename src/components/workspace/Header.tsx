@@ -7,7 +7,7 @@ import {
   Bell,
   UserCheck,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthWithNavigation } from "../../hooks/useAuthWithNavigation";
 
 interface HeaderProps {
   onEditProfile?: () => void;
@@ -24,7 +24,12 @@ const Header: React.FC<HeaderProps> = ({
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Dados do AuthContext
-  const { userType, logout, getUserDisplayName, getUserEmail } = useAuth();
+  const {
+    userType,
+    logoutWithRedirect,
+    getUserDisplayName,
+    getUserEmail,
+  } = useAuthWithNavigation();
 
   // Fechar menu quando clicar fora
   useEffect(() => {
@@ -51,9 +56,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogout = () => {
-    logout();
-    // Você pode adicionar redirecionamento aqui se necessário
-    // navigate('/login');
+    logoutWithRedirect();
   };
 
   const handleEditProfile = () => {
