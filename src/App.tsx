@@ -10,8 +10,11 @@ import { AnimatePresence } from "framer-motion";
 import IntroScreen from "./components/ui/IntroScreen";
 import LoginPageWithNavigation from "./components/login/LoginPageWithNavigation";
 import Desktop from "./components/workspace/Desktop";
+import ProtectedRoute from "./components/login/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
+import EditProfile from "./components/profile/EditProfile";
+import { ToastProvider } from "./context/ToastContext";
 
 // Componente principal da aplicação
 const AppContent: React.FC = () => {
@@ -32,8 +35,23 @@ const AppContent: React.FC = () => {
       {!showIntro && (
         <Routes>
           <Route path="/login" element={<LoginPageWithNavigation />} />
-          <Route path="/home" element={<Desktop />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Desktop />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       )}
     </div>
@@ -44,9 +62,11 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 };

@@ -149,6 +149,7 @@ const AuthPage: React.FC<AuthPageProps> = ({
           );
           localStorage.setItem("authToken", response.access_token);
           localStorage.setItem("userType", response.type);
+          localStorage.setItem("userData", JSON.stringify(response.user));
           onLogin(response);
         }
       } else if (currentMode === "register") {
@@ -164,6 +165,7 @@ const AuthPage: React.FC<AuthPageProps> = ({
           );
           localStorage.setItem("authToken", response.access_token);
           localStorage.setItem("userType", response.type);
+          localStorage.setItem("userData", JSON.stringify(response.user));
           onRegister(response);
         }
       } else {
@@ -174,6 +176,8 @@ const AuthPage: React.FC<AuthPageProps> = ({
           );
           localStorage.setItem("authToken", response.access_token);
           localStorage.setItem("userType", response.type);
+          localStorage.setItem("userData", JSON.stringify(response.guest));
+          console.log(response, "response guest");
           onGuestAccess(response);
         }
       }

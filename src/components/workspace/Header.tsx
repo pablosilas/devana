@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Settings,
@@ -10,26 +11,21 @@ import {
 import { useAuthWithNavigation } from "../../hooks/useAuthWithNavigation";
 
 interface HeaderProps {
-  onEditProfile?: () => void;
   onNotifications?: () => void;
   sidebarWidth?: number; // Para ajustar com a sidebar
 }
 
 const Header: React.FC<HeaderProps> = ({
-  onEditProfile,
   onNotifications,
   sidebarWidth = 64,
 }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Dados do AuthContext
-  const {
-    userType,
-    logoutWithRedirect,
-    getUserDisplayName,
-    getUserEmail,
-  } = useAuthWithNavigation();
+  const { userType, logoutWithRedirect, getUserDisplayName, getUserEmail } =
+    useAuthWithNavigation();
 
   // Fechar menu quando clicar fora
   useEffect(() => {
@@ -60,11 +56,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleEditProfile = () => {
-    if (onEditProfile) {
-      onEditProfile();
-    } else {
-      console.log("Editar perfil não implementado");
-    }
+    navigate("/profile");
   };
 
   const displayName = getUserDisplayName();
