@@ -52,6 +52,14 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
       >
         {typedText}
       </motion.h1>
+      <motion.p
+        className="intro-slogan"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, delay: 1.5 }}
+      >
+        Sua jornada digital começa aqui.
+      </motion.p>
     </motion.div>
   );
 };

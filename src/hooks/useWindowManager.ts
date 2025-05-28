@@ -13,7 +13,7 @@ export const useWindowManager = () => {
       isMinimized: false,
       isMaximized: false,
       position: { x: 100 + Math.random() * 200, y: 100 + Math.random() * 200 },
-      size: { width: 400, height: 300 },
+      size: { width: 400, height: 400 },
       zIndex: nextZIndex,
     };
     setWindows((prev) => [...prev, newWindow]);

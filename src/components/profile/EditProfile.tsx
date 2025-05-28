@@ -1,4 +1,3 @@
-// components/profile/EditProfile.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,6 +25,15 @@ interface PasswordData {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface ProfileUpdateData {
+  name: string;
+  email: string;
+  birthDate: string;
+  role: string;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 const EditProfile: React.FC = () => {
@@ -190,7 +198,7 @@ const EditProfile: React.FC = () => {
       });
 
       // Preparar dados para envio
-      const updateData: any = {
+      const updateData: ProfileUpdateData = {
         name: formData.name,
         email: formData.email,
         birthDate: formData.birthDate,
