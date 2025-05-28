@@ -115,7 +115,10 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth = 64 }) => {
         {/* Logo e Nome do Site */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-bold text-white font-['Space_Grotesk']">
+            <h1
+              className="text-2xl font-bold text-white font-['Space_Grotesk'] cursor-pointer"
+              onClick={() => navigate("/home")}
+            >
               Devana
             </h1>
           </div>

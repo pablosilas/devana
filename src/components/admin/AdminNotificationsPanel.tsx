@@ -306,7 +306,7 @@ const AdminNotificationsPanel: React.FC = () => {
 
   return (
     <MainLayout showFooter={false} showSidebar={false}>
-      <div className="min-h-screen bg-gray-900 p-6">
+      <div className="min-h-screen bg-gray-900 p-6 mt-20">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -319,20 +319,18 @@ const AdminNotificationsPanel: React.FC = () => {
 
             <div className="flex items-center space-x-4">
               <button
+                onClick={() => navigate("/home")}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Voltar ao Desktop
+              </button>
+              <button
                 onClick={() => setShowStats(!showStats)}
                 className="flex items-center space-x-2 px-4 py-2 text-gray-400 hover:text-white transition-colors"
               >
                 <BarChart3 size={16} />
                 <span>Estatísticas</span>
               </button>
-
-              <button
-                onClick={() => navigate("/home")}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-              >
-                Voltar ao Desktop
-              </button>
-
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
