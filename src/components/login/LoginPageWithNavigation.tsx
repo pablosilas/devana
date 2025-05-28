@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthPage from "./AuthPage";
 import { useAuth } from "../../context/AuthContext";
+import { useToastHelpers } from "../../hooks/useToastHelpers";
 
 // Interfaces das respostas da API (mesmas do AuthPage)
 interface User {
@@ -40,6 +41,7 @@ const LoginPageWithNavigation: React.FC = () => {
   const navigate = useNavigate();
   const { login, register, guestAccess, isAuthenticated, isLoading } =
     useAuth();
+  const { toastSuccess } = useToastHelpers();
 
   // Redirecionar para home se já estiver logado
   useEffect(() => {
@@ -55,6 +57,9 @@ const LoginPageWithNavigation: React.FC = () => {
     // Usar o método login do contexto
     login(userData);
 
+    // Mostrar toast de boas-vindas
+    toastSuccess("Bem-vindo!", `Olá, ${userData.user.name}!`);
+
     // Navegar para home
     navigate("/home");
   };
@@ -65,6 +70,12 @@ const LoginPageWithNavigation: React.FC = () => {
     // Usar o método register do contexto
     register(userData);
 
+    // Mostrar toast de boas-vindas
+    toastSuccess(
+      "Conta criada!",
+      `Bem-vindo ao Devana, ${userData.user.name}!`
+    );
+
     // Navegar para home
     navigate("/home");
   };
@@ -74,6 +85,9 @@ const LoginPageWithNavigation: React.FC = () => {
 
     // Usar o método guestAccess do contexto
     guestAccess(userData);
+
+    // Mostrar toast para convidado
+    toastSuccess("Acesso liberado!", `Bem-vindo, ${userData.guest.name}!`);
 
     // Navegar para home
     navigate("/home");

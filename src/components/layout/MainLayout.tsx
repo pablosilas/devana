@@ -1,14 +1,21 @@
-// components/layout/MainLayout.tsx
 import React, { useState, type ReactNode } from "react";
-import Header from "../workspace/Header";
-import Sidebar from "../workspace/Sidebar";
-import { useWindowManager } from "../../hooks/useWindowManager";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import type { WindowState } from "../../types/types";
+import Footer from "./Footer";
+
+interface WindowManager {
+  minimizedWindows: WindowState[];
+  createWindow: (component: string, title: string) => void;
+  restoreWindow: (id: string) => void;
+}
 
 interface MainLayoutProps {
   children: ReactNode;
   showSidebar?: boolean;
   showHeader?: boolean;
   showFooter?: boolean;
+  windowManager?: WindowManager;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -16,22 +23,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showSidebar = true,
   showHeader = true,
   showFooter = true,
+  windowManager,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { minimizedWindows, createWindow, restoreWindow } = useWindowManager();
 
   const sidebarWidth = isExpanded ? 256 : 64;
+  const minimizedWindows = windowManager?.minimizedWindows || [];
 
   return (
     <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
       {/* Container principal com flexbox */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        {showSidebar && (
+        {showSidebar && windowManager && (
           <Sidebar
-            onCreateWindow={createWindow}
+            onCreateWindow={windowManager.createWindow}
             minimizedWindows={minimizedWindows}
-            onRestoreWindow={restoreWindow}
+            onRestoreWindow={windowManager.restoreWindow}
             isExpanded={isExpanded}
             setIsExpanded={setIsExpanded}
           />
@@ -51,35 +59,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <div className="flex-1 overflow-auto">{children}</div>
         </div>
       </div>
-      {showFooter && (
-        <div
-          className="bg-gray-800 border-t border-gray-600 px-4 py-2 flex items-center space-x-2 flex-shrink-0"
-          style={showSidebar ? { marginLeft: `${sidebarWidth}px` } : {}}
-        >
-          {/* Minimized Windows */}
-          <div className="flex space-x-2">
-            {minimizedWindows.map((window) => (
-              <button
-                key={window.id}
-                onClick={() => restoreWindow(window.id)}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors text-white text-sm"
-              >
-                {window.title}
-              </button>
-            ))}
-          </div>
 
-          {/* Spacer */}
-          <div className="flex-1"></div>
-
-          {/* Clock */}
-          <div className="text-white text-sm font-medium">
-            {new Date().toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
-        </div>
+      {/* Footer/Taskbar */}
+      {showFooter && windowManager && (
+        <Footer
+          sidebarWidth={showSidebar ? sidebarWidth : 0}
+          minimizedWindows={minimizedWindows}
+          windowManager={windowManager}
+        />
       )}
     </div>
   );

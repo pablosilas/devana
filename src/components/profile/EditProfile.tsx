@@ -8,11 +8,11 @@ import {
   Code,
   Save,
   ArrowLeft,
-  Camera,
   Lock,
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useToastHelpers } from "../../hooks/useToastHelpers";
 import MainLayout from "../layout/MainLayout";
 
 interface EditProfileFormData {
@@ -28,19 +28,15 @@ interface PasswordData {
   confirmPassword: string;
 }
 
-// Interface para os dados de atualização do perfil
-interface UpdateProfileData {
-  name: string;
-  email: string;
-  birthDate: string;
-  role: string;
-  currentPassword?: string;
-  newPassword?: string;
-}
-
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { user, userType, refreshAuth } = useAuth();
+  const { user, userType, isAuthenticated, refreshAuth } = useAuth();
+  const {
+    toastProfileUpdated,
+    toastError,
+    toastValidationError,
+    toastNetworkError,
+  } = useToastHelpers();
 
   // Estados do formulário
   const [formData, setFormData] = useState<EditProfileFormData>({
@@ -59,15 +55,28 @@ const EditProfile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [successMessage, setSuccessMessage] = useState<string>("");
+
+  // Debug - Log para verificar se o componente está carregando
+  console.log("EditProfile carregado:", { user, userType, isAuthenticated });
 
   // Carregar dados do usuário
   useEffect(() => {
+    console.log("useEffect executado:", { user, userType });
     if (user && userType === "user") {
+      const birthDateFormatted = user.birthDate.includes("T")
+        ? user.birthDate.split("T")[0]
+        : user.birthDate;
+
       setFormData({
         name: user.name,
         email: user.email,
-        birthDate: user.birthDate.split("T")[0], // Formatar data para input
+        birthDate: birthDateFormatted,
+        role: user.role,
+      });
+      console.log("Dados do formulário carregados:", {
+        name: user.name,
+        email: user.email,
+        birthDate: birthDateFormatted,
         role: user.role,
       });
     }
@@ -76,8 +85,8 @@ const EditProfile: React.FC = () => {
   // Verificar se é convidado
   if (userType === "guest") {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="bg-gray-800 p-8 rounded-lg border border-gray-600">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-gray-800 p-8 rounded-lg border border-gray-600 max-w-md w-full">
           <h2 className="text-xl font-bold text-white mb-4">Acesso Restrito</h2>
           <p className="text-gray-300 mb-6">
             Convidados não podem editar perfil. Faça login ou registre-se para
@@ -85,11 +94,20 @@ const EditProfile: React.FC = () => {
           </p>
           <button
             onClick={() => navigate("/home")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
           >
             Voltar ao Desktop
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Se não está autenticado ou não tem dados do usuário
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-lg">Carregando dados do usuário...</div>
       </div>
     );
   }
@@ -99,15 +117,13 @@ const EditProfile: React.FC = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors([]); // Limpar erros ao digitar
-    setSuccessMessage("");
+    setErrors([]);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
     setErrors([]);
-    setSuccessMessage("");
   };
 
   const validateForm = (): boolean => {
@@ -144,12 +160,19 @@ const EditProfile: React.FC = () => {
       }
     }
 
-    setErrors(newErrors);
+    if (newErrors.length > 0) {
+      setErrors(newErrors);
+      // Mostrar primeiro erro como toast
+      toastValidationError(newErrors[0]);
+    }
+
     return newErrors.length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("Formulário enviado:", formData);
 
     if (!validateForm()) {
       return;
@@ -161,8 +184,13 @@ const EditProfile: React.FC = () => {
       const API_BASE_URL = "http://localhost:3003";
       const token = localStorage.getItem("authToken");
 
-      // Preparar dados para envio com tipagem adequada
-      const updateData: UpdateProfileData = {
+      console.log("Enviando requisição para API:", {
+        API_BASE_URL,
+        token: !!token,
+      });
+
+      // Preparar dados para envio
+      const updateData: any = {
         name: formData.name,
         email: formData.email,
         birthDate: formData.birthDate,
@@ -184,20 +212,52 @@ const EditProfile: React.FC = () => {
         body: JSON.stringify(updateData),
       });
 
+      console.log("Resposta da API:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Erro da API:", errorData);
+
+        // Tratar diferentes tipos de erro com toasts específicos
+        if (response.status === 409) {
+          toastError(
+            "Email já em uso",
+            "Este email já está sendo usado por outro usuário."
+          );
+        } else if (response.status === 401) {
+          toastError(
+            "Senha incorreta",
+            "A senha atual informada está incorreta."
+          );
+        } else if (response.status === 400) {
+          toastValidationError(
+            "Dados inválidos. Verifique os campos preenchidos."
+          );
+        } else if (response.status >= 500) {
+          toastNetworkError();
+        } else {
+          toastError(
+            "Erro ao atualizar",
+            errorData.message || "Erro desconhecido"
+          );
+        }
+
         throw new Error(errorData.message || "Erro ao atualizar perfil");
       }
 
       const updatedUser = await response.json();
+      console.log("Usuário atualizado:", updatedUser);
 
       // Atualizar dados no localStorage
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
       // Forçar refresh do contexto
-      refreshAuth();
+      if (refreshAuth) {
+        refreshAuth();
+      }
 
-      setSuccessMessage("Perfil atualizado com sucesso!");
+      // Mostrar toast de sucesso
+      toastProfileUpdated();
 
       // Limpar dados de senha
       setPasswordData({
@@ -212,8 +272,19 @@ const EditProfile: React.FC = () => {
         navigate("/home");
       }, 2000);
     } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Erro desconhecido";
+
+      // Se não foi tratado acima com toast específico, mostrar erro genérico
+      if (
+        !errorMessage.includes("Email já") &&
+        !errorMessage.includes("senha") &&
+        !errorMessage.includes("inválidos")
+      ) {
+        toastError("Erro ao salvar", errorMessage);
+      }
+
       setErrors([errorMessage]);
     } finally {
       setLoading(false);
@@ -232,7 +303,7 @@ const EditProfile: React.FC = () => {
   ];
 
   return (
-    <MainLayout showSidebar={false} showFooter={false}>
+    <MainLayout showFooter={false} showSidebar={false}>
       <div className="min-h-screen bg-gray-900 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
@@ -247,7 +318,7 @@ const EditProfile: React.FC = () => {
             <h1 className="text-2xl font-bold text-white">Editar Perfil</h1>
           </div>
 
-          {/* Mensagens de Erro/Sucesso */}
+          {/* Mensagens de Erro - apenas para fallback */}
           {errors.length > 0 && (
             <div className="bg-red-600/20 border border-red-600 rounded-lg p-4 mb-6">
               <div className="flex items-center space-x-2 mb-2">
@@ -264,15 +335,6 @@ const EditProfile: React.FC = () => {
             </div>
           )}
 
-          {successMessage && (
-            <div className="bg-green-600/20 border border-green-600 rounded-lg p-4 mb-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-green-400">{successMessage}</span>
-              </div>
-            </div>
-          )}
-
           {/* Formulário */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Avatar Section */}
@@ -284,15 +346,8 @@ const EditProfile: React.FC = () => {
                 <div>
                   <h3 className="text-white font-medium">Foto do Perfil</h3>
                   <p className="text-gray-400 text-sm">
-                    Clique para alterar sua foto
+                    Upload de foto em breve
                   </p>
-                  <button
-                    type="button"
-                    className="mt-2 flex items-center space-x-2 text-blue-400 hover:text-blue-300 text-sm"
-                  >
-                    <Camera size={14} />
-                    <span>Alterar Foto</span>
-                  </button>
                 </div>
               </div>
             </div>

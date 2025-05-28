@@ -14,7 +14,7 @@ export const particlesConfig: ISourceOptions = {
   },
   background: {
     color: {
-      value: "#000000",
+      value: "#1c2534",
     },
   },
   particles: {

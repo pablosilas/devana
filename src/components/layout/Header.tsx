@@ -9,8 +9,10 @@ import {
   UserCheck,
 } from "lucide-react";
 import { useAuthWithNavigation } from "../../hooks/useAuthWithNavigation";
+import { useToastHelpers } from "../../hooks/useToastHelpers";
 
 interface HeaderProps {
+  onEditProfile?: () => void;
   onNotifications?: () => void;
   sidebarWidth?: number; // Para ajustar com a sidebar
 }
@@ -22,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { toastInfo } = useToastHelpers();
 
   // Dados do AuthContext
   const { userType, logoutWithRedirect, getUserDisplayName, getUserEmail } =
@@ -52,7 +55,13 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogout = () => {
-    logoutWithRedirect();
+    const userName = getUserDisplayName();
+    toastInfo("Até logo!", `Tchau, ${userName}! Volte sempre.`);
+
+    // Delay pequeno para mostrar o toast antes do redirecionamento
+    setTimeout(() => {
+      logoutWithRedirect();
+    }, 500);
   };
 
   const handleEditProfile = () => {

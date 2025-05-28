@@ -13,8 +13,6 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({
   onCreateWindow,
-  minimizedWindows,
-  onRestoreWindow,
   isExpanded,
   setIsExpanded,
 }) => {
@@ -94,41 +92,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             })}
           </div>
         </div>
-
-        {/* Janelas minimizadas */}
-        {minimizedWindows.length > 0 && (
-          <div className="border-t border-gray-600 mt-auto">
-            <div className="p-4">
-              <div
-                className={`transition-all duration-500 ease-out overflow-hidden ${
-                  isExpanded ? "h-auto opacity-100 mb-3" : "h-0 opacity-0 mb-0"
-                }`}
-              >
-                <h3 className="text-gray-400 text-sm font-medium whitespace-nowrap">
-                  Janelas Minimizadas
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {minimizedWindows.map((window) => (
-                  <button
-                    key={window.id}
-                    onClick={() => onRestoreWindow(window.id)}
-                    className={`w-full px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white text-sm transition-colors text-left ${
-                      !isExpanded ? "flex justify-center" : ""
-                    }`}
-                    title={!isExpanded ? window.title : undefined}
-                  >
-                    {isExpanded ? (
-                      <div className="truncate">{window.title}</div>
-                    ) : (
-                      <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Spacer removido - será controlado pelo Desktop */}
