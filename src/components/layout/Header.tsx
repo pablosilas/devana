@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,28 +8,38 @@ import {
   ChevronDown,
   Bell,
   UserCheck,
+  Shield,
 } from "lucide-react";
 import { useAuthWithNavigation } from "../../hooks/useAuthWithNavigation";
 import { useToastHelpers } from "../../hooks/useToastHelpers";
+import { useNotifications } from "../../context/NotificationsContext";
+import NotificationsPanel from "../notifications/NotificationsPanel";
 
 interface HeaderProps {
   onEditProfile?: () => void;
-  onNotifications?: () => void;
   sidebarWidth?: number; // Para ajustar com a sidebar
 }
 
-const Header: React.FC<HeaderProps> = ({
-  onNotifications,
-  sidebarWidth = 64,
-}) => {
+const Header: React.FC<HeaderProps> = ({ sidebarWidth = 64 }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const notificationButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const { toastInfo } = useToastHelpers();
 
   // Dados do AuthContext
-  const { userType, logoutWithRedirect, getUserDisplayName, getUserEmail } =
-    useAuthWithNavigation();
+  const {
+    userType,
+    logoutWithRedirect,
+    getUserDisplayName,
+    getUserEmail,
+    token,
+  } = useAuthWithNavigation();
+
+  // Dados das notificações
+  const { unreadCount } = useNotifications();
 
   // Fechar menu quando clicar fora
   useEffect(() => {
@@ -44,6 +55,29 @@ const Header: React.FC<HeaderProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Verificar se é admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (userType === "user" && token) {
+        try {
+          const response = await fetch(
+            "http://localhost:3003/notifications/admin/check",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setIsAdmin(response.ok);
+        } catch {
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    checkAdmin();
+  }, [userType, token]);
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
@@ -90,15 +124,29 @@ const Header: React.FC<HeaderProps> = ({
         {/* Área do Usuário */}
         <div className="flex items-center space-x-4">
           {/* Botão de Notificações - apenas para usuários registrados */}
-          {!isGuest && onNotifications && (
-            <button
-              onClick={onNotifications}
-              className="p-2 text-white hover:text-gray-300 hover:bg-gray-700 rounded-lg transition-colors relative"
-            >
-              <Bell size={20} />
-              {/* Badge de notificação */}
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
+          {!isGuest && (
+            <div className="relative">
+              <button
+                ref={notificationButtonRef}
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2 text-white hover:text-gray-300 hover:bg-gray-700 rounded-lg transition-colors relative"
+              >
+                <Bell size={20} />
+                {/* Badge de notificação */}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Painel de Notificações */}
+              <NotificationsPanel
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                anchorRef={notificationButtonRef}
+              />
+            </div>
           )}
 
           {/* Menu do Usuário */}
@@ -178,6 +226,19 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     <Settings size={16} />
                     <span>Editar Perfil</span>
+                  </button>
+                )}
+
+                {/* Link de Admin */}
+                {isAdmin && (
+                  <button
+                    onClick={() =>
+                      handleMenuAction(() => navigate("/admin/notifications"))
+                    }
+                    className="w-full flex items-center space-x-3 px-4 py-2 text-left text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
+                  >
+                    <Shield size={16} />
+                    <span>Painel Admin</span>
                   </button>
                 )}
 

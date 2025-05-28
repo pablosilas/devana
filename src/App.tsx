@@ -15,6 +15,8 @@ import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
 import EditProfile from "./components/profile/EditProfile";
 import { ToastProvider } from "./context/ToastContext";
+import { NotificationsProvider } from "./context/NotificationsContext";
+import AdminNotificationsPanel from "./components/admin/AdminNotificationsPanel";
 
 // Componente principal da aplicação
 const AppContent: React.FC = () => {
@@ -52,6 +54,15 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          {/* Rota de Admin - Painel de Notificações */}
+          <Route
+            path="/admin/notifications"
+            element={
+              <ProtectedRoute>
+                <AdminNotificationsPanel />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       )}
     </div>
@@ -63,9 +74,11 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <NotificationsProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </NotificationsProvider>
       </ToastProvider>
     </AuthProvider>
   );

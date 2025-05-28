@@ -1,3 +1,4 @@
+// src/components/layout/MainLayout.tsx
 import React, { useState, type ReactNode } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -47,12 +48,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
         {/* Conteúdo principal */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
+          {/* Header com sistema de notificações integrado */}
           {showHeader && (
-            <Header
-              onNotifications={() => console.log("Notificações")}
-              sidebarWidth={showSidebar ? sidebarWidth : 0}
-            />
+            <Header sidebarWidth={showSidebar ? sidebarWidth : 0} />
           )}
 
           {/* Área de conteúdo */}
